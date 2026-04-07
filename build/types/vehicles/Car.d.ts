@@ -15,6 +15,10 @@ export declare class Car extends Vehicle implements IControllable {
     private timeToShift;
     private canTiltForwards;
     private characterWantsToExit;
+    /** Steering cap used in drift correction (subclasses may lower for stability). */
+    protected maxSteerVal: number;
+    /** Per-gear forward/reverse speed caps used by the transmission logic (subclasses may replace). */
+    protected gearboxMaxSpeeds: Record<string, number>;
     constructor(gltf: any);
     noDirectionPressed(): boolean;
     update(timeStep: number): void;

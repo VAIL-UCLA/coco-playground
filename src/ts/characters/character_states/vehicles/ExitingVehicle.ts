@@ -41,7 +41,10 @@ export class ExitingVehicle extends ExitingStateBase
 		{
 			this.detachCharacterFromVehicle();
 
-			this.seat.door.physicsEnabled = true;
+			if (this.seat.door !== undefined)
+			{
+				this.seat.door.physicsEnabled = true;
+			}
 
 			if (!this.character.rayHasHit)
 			{

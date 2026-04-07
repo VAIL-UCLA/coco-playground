@@ -13,6 +13,21 @@ import { SwitchingSeats } from '../characters/character_states/vehicles/Switchin
 import { EntityType } from '../enums/EntityType';
 import { IWorldEntity } from '../interfaces/IWorldEntity';
 
+function vehicleUserDataHidesVisual(ud: any): boolean
+{
+	if (ud == null || typeof ud !== 'object') return false;
+	if (typeof ud.visibility === 'string' && ud.visibility.toLowerCase() === 'hidden') return true;
+	const v = ud.hide_in_game;
+	if (v === true || v === 1) return true;
+	if (typeof v === 'string')
+	{
+		const s = v.toLowerCase();
+		if (s === 'true' || s === '1' || s === 'yes') return true;
+	}
+	if (ud.data === 'hidden_visual') return true;
+	return false;
+}
+
 export abstract class Vehicle extends THREE.Object3D implements IWorldEntity
 {
 	public updateOrder: number = 2;
@@ -30,6 +45,8 @@ export abstract class Vehicle extends THREE.Object3D implements IWorldEntity
 	public collision: CANNON.Body;
 	public materials: THREE.Material[] = [];
 	public spawnPoint: THREE.Object3D;
+	/** When true, walking up to enter skips door + sit animation (see {@link CocoVehicle}). */
+	public instantCharacterEnter: boolean = false;
 	private modelContainer: THREE.Group;
 
 	private firstPerson: boolean = false;
@@ -419,6 +436,10 @@ export abstract class Vehicle extends THREE.Object3D implements IWorldEntity
 					{
 						child.visible = false;
 					}
+				}
+				if (vehicleUserDataHidesVisual(child.userData))
+				{
+					child.visible = false;
 				}
 			}
 		});

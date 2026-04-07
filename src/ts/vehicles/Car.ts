@@ -32,6 +32,20 @@ export class Car extends Vehicle implements IControllable
 	private canTiltForwards: boolean = false;
 	private characterWantsToExit: boolean = false;
 
+	/** Steering cap used in drift correction (subclasses may lower for stability). */
+	protected maxSteerVal: number = 0.8;
+
+	/** Per-gear forward/reverse speed caps used by the transmission logic (subclasses may replace). */
+	protected gearboxMaxSpeeds: Record<string, number> = {
+		'R': -4,
+		'0': 0,
+		'1': 5,
+		'2': 9,
+		'3': 13,
+		'4': 17,
+		'5': 22,
+	};
+
 	constructor(gltf: any)
 	{
 		super(gltf, {
@@ -96,15 +110,7 @@ export class Car extends Vehicle implements IControllable
 		// Engine
 		const engineForce = 500;
 		const maxGears = 5;
-		const gearsMaxSpeeds = {
-			'R': -4,
-			'0': 0,
-			'1': 5,
-			'2': 9,
-			'3': 13,
-			'4': 17,
-			'5': 22,
-		};
+		const cap = this.gearboxMaxSpeeds;
 
 		if (this.shiftTimer > 0)
 		{
@@ -116,14 +122,16 @@ export class Car extends Vehicle implements IControllable
 			// Transmission 
 			if (this.actions.reverse.isPressed)
 			{
-				const powerFactor = (gearsMaxSpeeds['R'] - this.speed) / Math.abs(gearsMaxSpeeds['R']);
+				const powerFactor = (cap['R'] - this.speed) / Math.abs(cap['R']);
 				const force = (engineForce / this.gear) * (Math.abs(powerFactor) ** 1);
 
 				this.applyEngineForce(force);
 			}
 			else
 			{
-				const powerFactor = (gearsMaxSpeeds[this.gear] - this.speed) / (gearsMaxSpeeds[this.gear] - gearsMaxSpeeds[this.gear - 1]);
+				const g = String(this.gear);
+				const g1 = String(this.gear - 1);
+				const powerFactor = (cap[g] - this.speed) / (cap[g] - cap[g1]);
 
 				if (powerFactor < 0.1 && this.gear < maxGears) this.shiftUp();
 				else if (this.gear > 1 && powerFactor > 1.2) this.shiftDown();
@@ -238,18 +246,17 @@ export class Car extends Vehicle implements IControllable
 		velocity.normalize();
 		let driftCorrection = Utils.getSignedAngleBetweenVectors(Utils.threeVector(velocity), forward);
 
-		const maxSteerVal = 0.8;
 		let speedFactor = THREE.MathUtils.clamp(this.speed * 0.3, 1, Number.MAX_VALUE);
 
 		if (this.actions.right.isPressed)
 		{
-			let steering = Math.min(-maxSteerVal / speedFactor, -driftCorrection);
-			this.steeringSimulator.target = THREE.MathUtils.clamp(steering, -maxSteerVal, maxSteerVal);
+			let steering = Math.min(-this.maxSteerVal / speedFactor, -driftCorrection);
+			this.steeringSimulator.target = THREE.MathUtils.clamp(steering, -this.maxSteerVal, this.maxSteerVal);
 		}
 		else if (this.actions.left.isPressed)
 		{
-			let steering = Math.max(maxSteerVal / speedFactor, -driftCorrection);
-			this.steeringSimulator.target = THREE.MathUtils.clamp(steering, -maxSteerVal, maxSteerVal);
+			let steering = Math.max(this.maxSteerVal / speedFactor, -driftCorrection);
+			this.steeringSimulator.target = THREE.MathUtils.clamp(steering, -this.maxSteerVal, this.maxSteerVal);
 		}
 		else this.steeringSimulator.target = 0;
 

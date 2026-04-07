@@ -24,6 +24,8 @@ export declare abstract class Vehicle extends THREE.Object3D implements IWorldEn
     collision: CANNON.Body;
     materials: THREE.Material[];
     spawnPoint: THREE.Object3D;
+    /** When true, walking up to enter skips door + sit animation (see {@link CocoVehicle}). */
+    instantCharacterEnter: boolean;
     private modelContainer;
     private firstPerson;
     constructor(gltf: any, handlingSetup?: any);
