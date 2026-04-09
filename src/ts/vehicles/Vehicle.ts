@@ -442,6 +442,15 @@ export abstract class Vehicle extends THREE.Object3D implements IWorldEntity
 					child.visible = false;
 				}
 			}
+			// glTF primitive extras are merged onto geometry.userData (not mesh.userData).
+			if (child.isMesh)
+			{
+				const geom = (child as THREE.Mesh).geometry;
+				if (geom instanceof THREE.BufferGeometry && vehicleUserDataHidesVisual(geom.userData))
+				{
+					child.visible = false;
+				}
+			}
 		});
 
 		// Update mass properties after all collision shapes are added
