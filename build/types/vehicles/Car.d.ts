@@ -19,6 +19,8 @@ export declare class Car extends Vehicle implements IControllable {
     protected maxSteerVal: number;
     /** Per-gear forward/reverse speed caps used by the transmission logic (subclasses may replace). */
     protected gearboxMaxSpeeds: Record<string, number>;
+    /** Engine force used in transmission logic (subclasses may lower for stability). */
+    protected engineForce: number;
     constructor(gltf: any);
     noDirectionPressed(): boolean;
     update(timeStep: number): void;

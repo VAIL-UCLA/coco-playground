@@ -10,21 +10,27 @@ export class CocoVehicle extends Car
 	{
 		super(gltf);
 		this.instantCharacterEnter = true;
-		// Lower top speed than the default car (~22 → ~16 in top gear).
+		// Lower caps than stock car to reduce lateral load in turns (was ~16 top; now ~12).
 		this.gearboxMaxSpeeds = {
-			'R': -3,
+			'R': -2,
 			'0': 0,
-			'1': 4,
-			'2': 7,
-			'3': 10,
-			'4': 13,
-			'5': 16,
+			'1': 3,
+			'2': 5,
+			'3': 7,
+			'4': 9,
+			'5': 12,
 		};
 
-		// COCO-specific stability tuning.
-		this.maxSteerVal = 0.6;
+		// Less acceleration → less weight transfer when steering + throttle.
+		this.engineForce = 360;
+
+		// COCO-specific stability tuning (steer + roll).
+		this.maxSteerVal = 0.5;
 		this.rayCastVehicle.wheelInfos.forEach((wheelInfo) => {
-			wheelInfo.rollInfluence = 0.5;
+			wheelInfo.rollInfluence = 0.38;
 		});
+
+		// Damp roll oscillation slightly (chassis only; car unchanged).
+		this.collision.angularDamping = 0.35;
 	}
 }

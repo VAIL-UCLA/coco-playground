@@ -46,6 +46,9 @@ export class Car extends Vehicle implements IControllable
 		'5': 22,
 	};
 
+	/** Engine force used in transmission logic (subclasses may lower for stability). */
+	protected engineForce: number = 500;
+
 	constructor(gltf: any)
 	{
 		super(gltf, {
@@ -108,7 +111,6 @@ export class Car extends Vehicle implements IControllable
 		}
 
 		// Engine
-		const engineForce = 500;
 		const maxGears = 5;
 		const cap = this.gearboxMaxSpeeds;
 
@@ -123,7 +125,7 @@ export class Car extends Vehicle implements IControllable
 			if (this.actions.reverse.isPressed)
 			{
 				const powerFactor = (cap['R'] - this.speed) / Math.abs(cap['R']);
-				const force = (engineForce / this.gear) * (Math.abs(powerFactor) ** 1);
+				const force = (this.engineForce / this.gear) * (Math.abs(powerFactor) ** 1);
 
 				this.applyEngineForce(force);
 			}
@@ -137,7 +139,7 @@ export class Car extends Vehicle implements IControllable
 				else if (this.gear > 1 && powerFactor > 1.2) this.shiftDown();
 				else if (this.actions.throttle.isPressed)
 				{
-					const force = (engineForce / this.gear) * (powerFactor ** 1);
+					const force = (this.engineForce / this.gear) * (powerFactor ** 1);
 					this.applyEngineForce(-force);
 				}
 			}
