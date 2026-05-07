@@ -13,7 +13,7 @@ Mostly a playground for exploring how conventional third person gameplay mechani
 
 ## Developer acknowledgment
 
-This fork is developed and maintained by **Krystof Latka** ([@krystoflatka](https://github.com/krystoflatka)). This section is a public acknowledgement of that work alongside the original Sketchbook project and its contributors (see [Credits](#credits)).
+This fork is developed and maintained by **Krystof Latka** ([@latka-krystof](https://github.com/latka-krystof)). This section is a public acknowledgement of that work alongside the original Sketchbook project and its contributors (see [Credits](#credits)).
 
 ## Features
 
