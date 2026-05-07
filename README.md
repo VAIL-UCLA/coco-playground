@@ -5,18 +5,15 @@
 	<br>
 </p>
 
-# Final update (20. Feb 2023)
-
-As I have no more interest in developing this project, it comes to a conclusion. In order to remain honest about the true state of the project, I am archiving this repository.
-
-- If you wish to modify Sketchbook feel free to fork it.
-- To see if someone is currently maintaining a fork, check out the [Network Graph](https://github.com/swift502/Sketchbook/network).
-
 # 📒 Sketchbook
 
 Simple web based game engine built on [three.js](https://github.com/mrdoob/three.js) and [cannon.js](https://github.com/schteppe/cannon.js) focused on third-person character controls and related gameplay mechanics.
 
 Mostly a playground for exploring how conventional third person gameplay mechanics found in modern games work and recreating them in a general way.
+
+## Developer acknowledgment
+
+This fork is developed and maintained by **Krystof Latka** ([@krystoflatka](https://github.com/krystoflatka)). This section is a public acknowledgement of that work alongside the original Sketchbook project and its contributors (see [Credits](#credits)).
 
 ## Features
 
