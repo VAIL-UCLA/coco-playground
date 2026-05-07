@@ -8,6 +8,8 @@ import * as Utils from '../core/FunctionLibrary';
 import { SpringSimulator } from '../physics/spring_simulation/SpringSimulator';
 import { World } from '../world/World';
 import { EntityType } from '../enums/EntityType';
+import { FollowPath } from '../characters/character_ai/FollowPath';
+import { PathNode } from '../world/PathNode';
 
 export class Car extends Vehicle implements IControllable
 {
@@ -24,6 +26,7 @@ export class Car extends Vehicle implements IControllable
 
 	private steeringSimulator: SpringSimulator;
 	private gear: number = 1;
+	private autoDriveEnabled: boolean = false;
 
 	// Transmission
 	private shiftTimer: number;
@@ -37,17 +40,17 @@ export class Car extends Vehicle implements IControllable
 
 	/** Per-gear forward/reverse speed caps used by the transmission logic (subclasses may replace). */
 	protected gearboxMaxSpeeds: Record<string, number> = {
-		'R': -4,
+		'R': -2,
 		'0': 0,
-		'1': 5,
-		'2': 9,
-		'3': 13,
-		'4': 17,
-		'5': 22,
+		'1': 3,
+		'2': 5,
+		'3': 7,
+		'4': 9,
+		'5': 12,
 	};
 
 	/** Engine force used in transmission logic (subclasses may lower for stability). */
-	protected engineForce: number = 500;
+	protected engineForce: number = 300;
 
 	constructor(gltf: any)
 	{
@@ -72,6 +75,7 @@ export class Car extends Vehicle implements IControllable
 			'brake': new KeyBinding('Space'),
 			'left': new KeyBinding('KeyA'),
 			'right': new KeyBinding('KeyD'),
+			'auto_drive_toggle': new KeyBinding('KeyM'),
 			'exitVehicle': new KeyBinding('KeyF'),
 			'seat_switch': new KeyBinding('KeyX'),
 			'view': new KeyBinding('KeyV'),
@@ -94,6 +98,10 @@ export class Car extends Vehicle implements IControllable
 	public update(timeStep: number): void
 	{
 		super.update(timeStep);
+		if (this.controllingCharacter === undefined && this.autoDriveEnabled)
+		{
+			this.autoDriveEnabled = false;
+		}
 
 		const tiresHaveContact = this.rayCastVehicle.numWheelsOnGround > 0;
 
@@ -282,6 +290,10 @@ export class Car extends Vehicle implements IControllable
 			this.characterWantsToExit = false;
 			this.triggerAction('brake', false);
 		}
+		if (this.actions.auto_drive_toggle.justPressed)
+		{
+			this.toggleAutoDrive();
+		}
 		if (this.actions.throttle.justReleased || this.actions.reverse.justReleased)
 		{
 			this.applyEngineForce(0);
@@ -300,10 +312,78 @@ export class Car extends Vehicle implements IControllable
 		}
 	}
 
+	public handleKeyboardEvent(event: KeyboardEvent, code: string, pressed: boolean): void
+	{
+		// In auto mode, accept only mode toggle + global combos.
+		if (this.autoDriveEnabled)
+		{
+			const isToggleKey = code === 'KeyM';
+			const isGlobalCombo = pressed && event.shiftKey && (code === 'KeyC' || code === 'KeyR');
+			if (!isToggleKey && !isGlobalCombo) return;
+		}
+
+		super.handleKeyboardEvent(event, code, pressed);
+	}
+
+	private toggleAutoDrive(): void
+	{
+		if (this.controllingCharacter === undefined) return;
+
+		if (this.autoDriveEnabled)
+		{
+			this.autoDriveEnabled = false;
+			this.controllingCharacter.behaviour = undefined;
+			this.resetControls();
+			this.refreshDrivingControlsUI();
+			return;
+		}
+
+		const startNode = this.findClosestPathNode();
+		if (startNode === undefined)
+		{
+			console.warn('Auto mode unavailable: no path nodes found.');
+			return;
+		}
+
+		this.controllingCharacter.setBehaviour(new FollowPath(startNode, 10));
+		this.autoDriveEnabled = true;
+		this.resetControls();
+		this.refreshDrivingControlsUI();
+	}
+
+	private findClosestPathNode(): PathNode
+	{
+		let closest: PathNode = undefined;
+		let bestDistanceSq = Number.POSITIVE_INFINITY;
+		const nodeWorldPos = new THREE.Vector3();
+
+		for (const path of this.world.paths)
+		{
+			for (const nodeName in path.nodes)
+			{
+				if (!Object.prototype.hasOwnProperty.call(path.nodes, nodeName)) continue;
+				const node = path.nodes[nodeName];
+				node.object.getWorldPosition(nodeWorldPos);
+				const d2 = this.position.distanceToSquared(nodeWorldPos);
+				if (d2 < bestDistanceSq)
+				{
+					bestDistanceSq = d2;
+					closest = node;
+				}
+			}
+		}
+
+		return closest;
+	}
+
 	public inputReceiverInit(): void
 	{
 		super.inputReceiverInit();
+		this.refreshDrivingControlsUI();
+	}
 
+	private refreshDrivingControlsUI(): void
+	{
 		this.world.updateControls([
 			{
 				keys: ['W', 'S'],
@@ -320,6 +400,10 @@ export class Car extends Vehicle implements IControllable
 			{
 				keys: ['V'],
 				desc: 'View select'
+			},
+			{
+				keys: ['M'],
+				desc: `Manual / auto drive (current: ${this.autoDriveEnabled ? 'AUTO' : 'MANUAL'})`
 			},
 			{
 				keys: ['F'],

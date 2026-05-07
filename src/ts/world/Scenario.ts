@@ -83,6 +83,11 @@ export class Scenario
 							}
 						}
 
+						if (child.userData.hasOwnProperty('hide_driver'))
+						{
+							sp.hideDriver = child.userData.hide_driver === 'true';
+						}
+
 						this.spawnPoints.push(sp);
 					}
 					else if (child.userData.type === 'player')

@@ -79,6 +79,8 @@ export class Character extends THREE.Object3D implements IWorldEntity
 	public controlledObject: IControllable;
 	public occupyingSeat: VehicleSeat = null;
 	public vehicleEntryInstance: VehicleEntryInstance = null;
+	/** Keeps rider hidden while seated when requested by spawn-point config. */
+	public hideInVehicleVisual: boolean = false;
 	
 	private physicsEnabled: boolean = true;
 
@@ -754,6 +756,8 @@ export class Character extends THREE.Object3D implements IWorldEntity
 	{
 		if (this.controlledObject?.controllingCharacter === this)
 		{
+			this.hideInVehicleVisual = false;
+			this.modelContainer.visible = true;
 			this.controlledObject.allowSleep(true);
 			this.controlledObject.controllingCharacter = undefined;
 			this.controlledObject.resetControls();

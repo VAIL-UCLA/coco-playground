@@ -144,7 +144,7 @@ export abstract class Vehicle extends THREE.Object3D implements IWorldEntity
 	{
 		if (this.actions.seat_switch.justPressed && this.controllingCharacter?.occupyingSeat?.connectedSeats.length > 0)
 		{
-			this.controllingCharacter.modelContainer.visible = true;
+			this.controllingCharacter.modelContainer.visible = !this.controllingCharacter.hideInVehicleVisual;
 			this.controllingCharacter.setState(
 				new SwitchingSeats(
 					this.controllingCharacter,
@@ -206,7 +206,11 @@ export abstract class Vehicle extends THREE.Object3D implements IWorldEntity
 	public setFirstPersonView(value: boolean): void
 	{
 		this.firstPerson = value;
-		if (this.controllingCharacter !== undefined) this.controllingCharacter.modelContainer.visible = !value;
+		if (this.controllingCharacter !== undefined)
+		{
+			const shouldHideCharacter = value || this.controllingCharacter.hideInVehicleVisual;
+			this.controllingCharacter.modelContainer.visible = !shouldHideCharacter;
+		}
 
 		if (value)
 		{

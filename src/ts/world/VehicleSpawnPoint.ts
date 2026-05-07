@@ -17,6 +17,7 @@ export class VehicleSpawnPoint implements ISpawnPoint
 	public type: string;
 	public driver: string;
 	public firstAINode: string;
+	public hideDriver: boolean = false;
 
 	private object: THREE.Object3D;
 
@@ -50,6 +51,13 @@ export class VehicleSpawnPoint implements ISpawnPoint
 					let character = new Character(charModel);
 					world.add(character);
 					character.teleportToVehicle(vehicle, vehicle.seats[0]);
+					character.hideInVehicleVisual = this.hideDriver;
+
+					// Optional: hide Boxman while seated (used for racing Coco spawns).
+					if (this.hideDriver)
+					{
+						character.modelContainer.visible = false;
+					}
 
 					if (this.driver === 'player')
 					{
