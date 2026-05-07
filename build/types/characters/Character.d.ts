@@ -57,6 +57,8 @@ export declare class Character extends THREE.Object3D implements IWorldEntity {
     controlledObject: IControllable;
     occupyingSeat: VehicleSeat;
     vehicleEntryInstance: VehicleEntryInstance;
+    /** Keeps rider hidden while seated when requested by spawn-point config. */
+    hideInVehicleVisual: boolean;
     private physicsEnabled;
     constructor(gltf: any);
     setAnimations(animations: []): void;

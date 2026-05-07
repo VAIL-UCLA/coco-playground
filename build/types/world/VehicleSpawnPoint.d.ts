@@ -6,6 +6,7 @@ export declare class VehicleSpawnPoint implements ISpawnPoint {
     type: string;
     driver: string;
     firstAINode: string;
+    hideDriver: boolean;
     private object;
     constructor(object: THREE.Object3D);
     spawn(loadingManager: LoadingManager, world: World): void;

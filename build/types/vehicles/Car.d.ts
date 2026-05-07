@@ -11,6 +11,7 @@ export declare class Car extends Vehicle implements IControllable {
     private airSpinTimer;
     private steeringSimulator;
     private gear;
+    private autoDriveEnabled;
     private shiftTimer;
     private timeToShift;
     private canTiltForwards;
@@ -28,6 +29,10 @@ export declare class Car extends Vehicle implements IControllable {
     shiftDown(): void;
     physicsPreStep(body: CANNON.Body, car: Car): void;
     onInputChange(): void;
+    handleKeyboardEvent(event: KeyboardEvent, code: string, pressed: boolean): void;
+    private toggleAutoDrive;
+    private findClosestPathNode;
     inputReceiverInit(): void;
+    private refreshDrivingControlsUI;
     readCarData(gltf: any): void;
 }
